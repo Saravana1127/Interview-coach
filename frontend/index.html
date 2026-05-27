@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Placement Portal — Mock Interview Simulator</title>
+  <meta name="description" content="AI-powered mock interview and MCQ assessment simulator with real-time proctoring and detailed evaluation reports." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── Top navigation bar ─────────────────────────────────────────── -->
+  <header id="topbar" class="topbar">
+    <div class="logo">AI Placement Portal</div>
+    <div id="sessionInfo" class="session-info d-none">
+      <span id="sName"></span>
+      <span id="sJob"></span>
+      <div class="turn-pill"><span class="turn-dot"></span><span id="turnPillTxt">Turn 1/7</span></div>
+    </div>
+    <div id="intStrip" class="integrity-strip hidden">
+      <div class="m" id="mTab"><span class="d"></span>Tabs:<b id="cTab">0</b></div>
+      <div class="m" id="mPaste"><span class="d"></span>Paste:<b id="cPaste">0</b></div>
+      <div class="m" id="mMouse"><span class="d"></span>Mouse:<b id="cMouse">0</b></div>
+    </div>
+    <button id="gearBtn" class="gear-btn" title="Settings" aria-label="Open settings">Settings</button>
+  </header>
+
+
+  <!-- ── VIEW: Setup (landing) ──────────────────────────────────────── -->
+  <section id="setup-view" class="landing fade-in" aria-label="Home">
+    <div class="orb orb1" aria-hidden="true"></div>
+    <div class="orb orb2" aria-hidden="true"></div>
+    <div class="orb orb3" aria-hidden="true"></div>
+    <h1 class="hero-logo">AI Placement Portal</h1>
+    <p class="hero-sub">AI-Powered Interview Preparation Platform</p>
+    <p class="tagline">Practice HR behavioral interviews or timed MCQ quizzes — with real-time proctoring and scored evaluation reports.</p>
+
+    <div id="modeSelector" class="mode-selector" role="radiogroup" aria-label="Interview mode">
+      <div id="modeHR"  class="mode-card hr"  role="radio" tabindex="0" onclick="selectMode('hr')"  onkeydown="if(event.key==='Enter'||event.key===' ')selectMode('hr')">
+        <span class="mode-icon">Conversation</span>
+        <h2>HR Behavioral Interview</h2>
+        <p>Live 1-on-1 with Sarah, your AI HR Manager. Voice, video &amp; proctored.</p>
+        <span class="mode-arrow">Start Interview →</span>
+      </div>
+      <div id="modeMCQ" class="mode-card mcq" role="radio" tabindex="0" onclick="selectMode('mcq')" onkeydown="if(event.key==='Enter'||event.key===' ')selectMode('mcq')">
+        <span class="mode-icon">Quiz</span>
+        <h2>MCQ Quiz Assessment</h2>
+        <p>Timed role-specific multiple-choice questions with a detailed scored report.</p>
+        <span class="mode-arrow">Start Quiz →</span>
+      </div>
+    </div>
+
+    <div id="hrSetup" class="setup-card hidden" aria-label="HR interview setup">
+      <h2>Configure Your Interview</h2>
+      <div class="field"><label for="inName">Your Name</label><input id="inName" type="text" placeholder="e.g. Alex Johnson" maxlength="50" autocomplete="name" /></div>
+      <div class="field"><label for="inJob">Job Title Applying For</label><input id="inJob" type="text" placeholder="e.g. Senior Software Engineer" maxlength="100" /></div>
+      <button id="btnStart" class="cta">Start Interview with Sarah</button>
+      <button class="muted-btn mt-sm" onclick="backToModes()">← Back</button>
+    </div>
+
+    <div id="mcqSetup" class="mcq-setup hidden" aria-label="MCQ quiz setup">
+      <h2>Configure Your MCQ Quiz</h2>
+      <div class="field"><label for="mcqName">Your Name</label><input id="mcqName" type="text" placeholder="e.g. Alex Johnson" maxlength="50" autocomplete="name" /></div>
+      <div class="field"><label for="mcqTopic">Assessment Topic</label><input id="mcqTopic" type="text" placeholder="e.g. Frontend Developer, Data Science" maxlength="100" /></div>
+      <div class="field"><label for="mcqCount">Number of Questions</label>
+        <select id="mcqCount"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option></select></div>
+      <div class="field"><label for="mcqTime">Time Limit</label>
+        <select id="mcqTime"><option value="5">5 min</option><option value="10" selected>10 min</option><option value="15">15 min</option><option value="20">20 min</option><option value="30">30 min</option></select></div>
+      <button id="btnMcqStart" class="cta cta-blue">Generate &amp; Start Quiz</button>
+      <button class="muted-btn mt-sm" onclick="backToModes()">← Back</button>
+    </div>
+
+    <div class="features">
+      <div class="fcard"><div class="icon">Conversation</div><h3>Conversational Q&amp;A</h3><p>Speak or type your answers naturally with voice support.</p></div>
+      <div class="fcard"><div class="icon">Quiz</div><h3>MCQ Quiz Mode</h3><p>AI-generated questions with a countdown timer and live tracking.</p></div>
+      <div class="fcard"><div class="icon">Reports</div><h3>Detailed Reports</h3><p>Scored evaluations, integrity metrics, and a personalised learning roadmap.</p></div>
+    </div>
+  </section>
+
+
+  <!-- ── VIEW: MCQ Quiz ─────────────────────────────────────────────── -->
+  <section id="mcq-view" class="mcq-page hidden" aria-label="MCQ Quiz">
+    <div class="mcq-topbar">
+      <div class="mcq-meta"><b id="mcqMetaName"></b> · <span id="mcqMetaTopic"></span></div>
+      <div id="mcqTimer" class="mcq-timer" role="timer" aria-label="Time remaining"><span id="mcqTimerTxt">10:00</span></div>
+    </div>
+    <div class="mcq-progress-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+      <div id="mcqProgressFill" class="mcq-progress-fill progress-zero"></div>
+    </div>
+    <nav id="mcqDots" class="mcq-q-dots" aria-label="Question navigator"></nav>
+    <div id="mcq-question-card" class="mcq-question-card">
+      <div id="mcqQNum" class="mcq-q-num">Question 1 of 10</div>
+      <div id="mcqQText" class="mcq-q-text">Loading questions…</div>
+      <div id="mcqOptions" class="mcq-options" role="listbox" aria-label="Answer options"></div>
+    </div>
+    <div class="mcq-nav">
+      <button id="mcqPrev"   class="mcq-nav-btn mcq-nav-prev"          onclick="mcqNav(-1)" disabled>← Previous</button>
+      <button id="mcqNext"   class="mcq-nav-btn mcq-nav-next"          onclick="mcqNav(1)">Next →</button>
+      <button id="mcqSubmit" class="mcq-nav-btn mcq-nav-submit hidden" onclick="mcqFinish()">Submit Quiz</button>
+    </div>
+  </section>
+
+
+  <!-- ── VIEW: MCQ Report ───────────────────────────────────────────── -->
+  <section id="mcq-report-view" class="report hidden" aria-label="MCQ Assessment Report">
+    <div class="report-header"><h1>MCQ Assessment Report</h1><p id="mcqRMeta" class="meta"></p></div>
+    <div id="mcqScoreRing" class="mcq-score-ring" aria-label="Score">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="ring-bg" cx="100" cy="100" r="85" />
+        <circle id="mcqRingFill" class="ring-fill" cx="100" cy="100" r="85" stroke="#06b6d4" stroke-dasharray="534" stroke-dashoffset="534" />
+      </svg>
+      <div class="mcq-score-center"><div id="mcqScoreNum" class="mcq-score-num">0%</div><div class="mcq-score-label">Score</div></div>
+    </div>
+    <div id="mcqStatGrid" class="mcq-stat-grid"></div>
+    <div id="mcqTimeGrid" class="mcq-time-grid"></div>
+    <div class="integrity-section"><h2>Session Integrity</h2><div id="mcqIGrid" class="ig"></div></div>
+    <h2 class="review-h2">AI Feedback &amp; Question Review</h2>
+    <div id="mcqReviewCards"></div>
+    <div class="report-actions">
+      <button class="bp" onclick="window.print()">Download PDF</button>
+      <button class="bn" onclick="startNew()">New Session</button>
+      <button class="bn" onclick="shareMcqResult()">Share</button>
+    </div>
+  </section>
+
+
+  <!-- ── VIEW: HR Interview (live chat) ────────────────────────────── -->
+  <section id="hr-view" class="interview hidden" aria-label="HR Behavioral Interview">
+    <div class="interview-body">
+      <aside class="sidebar" aria-label="Interview sidebar">
+        <div id="assistantWrap" class="assistant-avatar-wrap"><div class="assistant-avatar">S</div></div>
+        <div class="assistant-name">Sarah</div>
+        <div class="assistant-role">Senior HR Manager · AI</div>
+        <div class="assistant-status"><span id="assistantDot" class="dot" aria-hidden="true"></span><span id="assistantStatusTxt">Preparing…</span></div>
+        <div class="turn-indicator" role="status">
+          <div class="turn-label">Interview Progress</div>
+          <div id="turnCount" class="turn-count" aria-live="polite">1 / 7</div>
+          <div class="turn-total">turns completed</div>
+          <div class="turn-progress"><div id="turnFill" class="turn-fill progress-zero"></div></div>
+        </div>
+        <div id="camWrap" class="sidebar-cam">
+          <video id="camVideo" autoplay muted playsinline aria-label="Your camera"></video>
+          <div id="camOff" class="cam-off hidden"><span class="cam-icon">Camera unavailable</span></div>
+          <span id="camBadge" class="cam-badge">● LIVE</span>
+        </div>
+      </aside>
+      <main class="chat-area">
+        <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-label="Interview conversation"></div>
+        <p id="chatHint" class="chat-hint">Press Enter to send · Shift+Enter for new line · Voice input supported</p>
+        <div id="chatInputBar" class="chat-input-bar">
+          <div class="chat-input-wrap">
+            <textarea id="chatInput" placeholder="Type your response to Sarah…" rows="1" aria-label="Your answer"></textarea>
+            <button id="micBtn" class="mic-btn" aria-label="Toggle microphone">Voice</button>
+          </div>
+          <button id="sendBtn" class="send-btn" disabled aria-label="Send answer">Send</button>
+        </div>
+      </main>
+    </div>
+  </section>
+
+
+  <!-- ── VIEW: HR Evaluation Dashboard ─────────────────────────────── -->
+  <section id="dashboard-view" class="report hidden" aria-label="HR Evaluation Report">
+    <div class="report-header"><h1>HR Behavioral Evaluation Report</h1><p id="rMeta" class="meta"></p></div>
+    <div id="evalGrid" class="eval-grid"></div>
+    <div class="verdict-section"><div id="vBadge" class="verdict-badge" role="status">—</div></div>
+    <div id="tCol" class="two-col"></div>
+    <div class="turn-analysis"><h2>Turn-by-Turn Analysis</h2><div id="turnCards"></div></div>
+    <div class="integrity-section"><h2>Session Integrity</h2><div id="iGrid" class="ig"></div></div>
+    <div class="report-actions">
+      <button class="bp" onclick="window.print()">Download PDF</button>
+      <button class="bn" onclick="startNew()">New Interview</button>
+      <button class="bn" onclick="shareHRResult()">Share</button>
+    </div>
+  </section>
+
+
+  <!-- ── Overlays ──────────────────────────────────────────────────── -->
+  <div id="warnBanner" class="warning-banner red hidden" role="alert" aria-live="assertive"></div>
+
+  <div id="setOvl" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="modal">
+      <button class="cb" onclick="togSet()" aria-label="Close settings">✕</button>
+      <h2>Settings</h2>
+      <div class="sg">
+        <div class="field"><label for="sApiBase">Backend API Base URL</label><input id="sApiBase" type="url" placeholder="http://localhost:8000" /></div>
+        <div class="field"><label for="sMod">Model Name</label><input id="sMod" type="text" placeholder="llama3" /></div>
+        <div class="field"><label for="sTurns">Total Interview Turns</label>
+          <select id="sTurns"><option value="5">5</option><option value="7" selected>7</option><option value="10">10</option></select></div>
+        <div class="field cb-field">
+          <label class="cb-label"><input type="checkbox" id="sPr"  checked class="w-auto" /> Proctoring</label>
+          <label class="cb-label"><input type="checkbox" id="sTTS" checked class="w-auto" /> Voice (TTS)</label>
+        </div>
+      </div>
+      <div class="sa"><button class="sv" onclick="saveSettings()">Save</button><button class="sc" onclick="togSet()">Cancel</button></div>
+    </div>
+  </div>
+
+  <div id="errOvl" class="overlay hidden" role="alertdialog" aria-modal="true" aria-label="Error">
+    <div class="modal modal-err">
+      <h2>AI Unavailable</h2>
+      <p id="errMsg" class="err-msg"></p>
+      <button id="retryBtn" class="cta retry-btn">Retry</button>
+    </div>
+  </div>
+
+
+  <!-- ── Scripts: load order matters ──────────────────────────────── -->
+  <script src="proctoring.js"></script>
+  <script src="webrtc.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
