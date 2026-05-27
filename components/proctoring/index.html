@@ -72,7 +72,7 @@
         });
 
         // Initialize component
-        sendMessageToStreamlit("streamlit:setComponentReady", { apiVersion: 1 });
+        sendMessageToStreamlit("streamlit:componentReady", { apiVersion: 1 });
         sendMessageToStreamlit("streamlit:setFrameHeight", { height: 0 });
     </script>
 </body>

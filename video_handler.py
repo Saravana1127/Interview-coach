@@ -29,6 +29,7 @@ def render_camera_feed(key: str = "hr-camera") -> bool:
             rtc_configuration=RTCConfiguration(_RTC_CONFIG),
             media_stream_constraints={"video": True, "audio": False},
             async_processing=True,
+            desired_playing_state=True,
         )
         return ctx is not None and ctx.state.playing
     except Exception as exc:
