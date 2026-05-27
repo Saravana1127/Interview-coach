@@ -37,14 +37,14 @@
 
     /**
      * Attach DOM listeners and begin proctoring.
-     * @param {() => string} getPhase   - Returns current app phase ('interview'|'mcq'|'idle')
+     * @param {() => string} getPhase   - Returns current app phase ('interview''mcq''idle')
      * @param {() => object} getContext - Returns extra context to log with each event
      */
     start(getPhase, getContext) {
       if (this._active) return;
       this._active     = true;
-      this._getPhase   = getPhase   || (() => 'idle');
-      this._getContext = getContext || (() => ({}));
+      this._getPhase   = getPhase    (() => 'idle');
+      this._getContext = getContext  (() => ({}));
 
       document.addEventListener('visibilitychange', this._onVisibility);
       document.addEventListener('paste',            this._onPaste);
@@ -86,7 +86,7 @@
 
     _handleVisibility() {
       const phase = this._getPhase();
-      if (phase === 'idle' || !document.hidden) return;
+      if (phase === 'idle'  !document.hidden) return;
 
       const entry = { phase, context: this._getContext(), t: Date.now() };
       this._tabs.push(entry);
@@ -97,7 +97,7 @@
       const phase = this._getPhase();
       if (phase === 'idle') return;
 
-      const text  = (e.clipboardData || window.clipboardData).getData('text');
+      const text  = (e.clipboardData  window.clipboardData).getData('text');
       const entry = { phase, context: this._getContext(), len: text.length, t: Date.now() };
       this._pastes.push(entry);
       this._emit('paste', entry);
@@ -130,7 +130,7 @@
 
     async _flagToBackend(type, context) {
       // Derive base URL from the global Cfg if available, else default
-      const base = (window._AIP_CFG && window._AIP_CFG.apiBase) || 'http://localhost:8000';
+      const base = (window._AIP_CFG && window._AIP_CFG.apiBase)  'http://localhost:8000';
       try {
         await fetch(`${base}/api/proctoring/flag`, {
           method:  'POST',

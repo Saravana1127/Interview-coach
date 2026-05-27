@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <script>
+        function sendMessageToStreamlit(type, data) {
+            window.parent.postMessage({
+                isStreamlitMessage: true,
+                type: type,
+                ...data
+            }, "*");
+        }
+
+        let isInitialized = false;
+        let tabSwitches = 0;
+        let pasteCount = 0;
+        let fullscreenExits = 0;
+
+        function sendValues() {
+            sendMessageToStreamlit("streamlit:setComponentValue", {
+                value: {
+                    tabs: tabSwitches,
+                    pastes: pasteCount,
+                    fs_exits: fullscreenExits
+                }
+            });
+        }
+
+        // Listen for messages from Streamlit
+        window.addEventListener("message", (event) => {
+            if (event.data.type === "streamlit:render") {
+                sendMessageToStreamlit("streamlit:setFrameHeight", { height: 0 });
+                
+                if (!isInitialized) {
+                    isInitialized = true;
+                    let pDoc = window.parent.document;
+
+                    pDoc.addEventListener('visibilitychange', () => {
+                        if (pDoc.visibilityState === 'hidden') {
+                            tabSwitches++;
+                            sendValues();
+                            let warn = pDoc.createElement('div');
+                            warn.style = "position:fixed;top:10px;left:50%;transform:translateX(-50%);background:red;color:white;padding:10px 20px;border-radius:5px;z-index:99999;font-weight:bold;";
+                            warn.innerText = "Warning: Tab switching recorded!";
+                            pDoc.body.appendChild(warn);
+                            setTimeout(() => warn.remove(), 3000);
+                        }
+                    });
+
+                    pDoc.addEventListener('paste', () => {
+                        pasteCount++;
+                        sendValues();
+                        let warn = pDoc.createElement('div');
+                        warn.style = "position:fixed;top:10px;left:50%;transform:translateX(-50%);background:orange;color:black;padding:10px 20px;border-radius:5px;z-index:99999;font-weight:bold;";
+                        warn.innerText = "Warning: Copy-pasting is not allowed!";
+                        pDoc.body.appendChild(warn);
+                        setTimeout(() => warn.remove(), 3000);
+                    });
+
+                    pDoc.addEventListener('fullscreenchange', () => {
+                        if (!pDoc.fullscreenElement) {
+                            fullscreenExits++;
+                            sendValues();
+                        }
+                    });
+                    
+                    sendValues();
+                }
+            }
+        });
+
+        // Initialize component
+        sendMessageToStreamlit("streamlit:setComponentReady", { apiVersion: 1 });
+        sendMessageToStreamlit("streamlit:setFrameHeight", { height: 0 });
+    </script>
+</body>
+</html>

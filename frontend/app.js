@@ -35,7 +35,7 @@
   window._AIP_CFG = Cfg;
 
   function _loadCfg() {
-    try { return JSON.parse(localStorage.getItem('aip_cfg') || '{}'); }
+    try { return JSON.parse(localStorage.getItem('aip_cfg')  '{}'); }
     catch { return {}; }
   }
 
@@ -149,7 +149,7 @@
 
     S.phase = name;
     $('intStrip').classList.toggle('hidden', name !== 'interview' && name !== 'mcq');
-    $('sessionInfo').style.display = (name === 'interview' || name === 'report') ? 'flex' : 'none';
+    $('sessionInfo').style.display = (name === 'interview'  name === 'report') ? 'flex' : 'none';
     _saveState();
   }
 
@@ -188,8 +188,8 @@
   }
 
   function saveSettings() {
-    Cfg.apiBase    = $('sApiBase').value.trim() || DEFAULT_CFG.apiBase;
-    Cfg.model      = $('sMod').value.trim()     || DEFAULT_CFG.model;
+    Cfg.apiBase    = $('sApiBase').value.trim()  DEFAULT_CFG.apiBase;
+    Cfg.model      = $('sMod').value.trim()      DEFAULT_CFG.model;
     Cfg.totalTurns = +$('sTurns').value;
     Cfg.proctor    = $('sPr').checked;
     Cfg.tts        = $('sTTS').checked;
@@ -211,7 +211,7 @@
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || err.error || `HTTP ${res.status}`);
+      throw new Error(err.detail  err.error  `HTTP ${res.status}`);
     }
     return res.json();
   }
@@ -232,7 +232,7 @@
       paste:       'Paste detected & logged!',
       mouse_leave: 'Mouse left the interview window',
     };
-    showBanner(msgs[type] || 'Proctoring event', type === 'mouse_leave' ? 'amber' : 'red');
+    showBanner(msgs[type]  'Proctoring event', type === 'mouse_leave' ? 'amber' : 'red');
     _updateIntegrityUI();
   });
 
@@ -345,7 +345,7 @@ RULES:
       S.conv.push({ role: 'user', content: prompt });
 
       const data  = await apiPost('/api/chat', { messages: S.conv, temperature: 0.7 });
-      const reply = data.choices?.[0]?.message?.content || '';
+      const reply = data.choices?.[0]?.message?.content  '';
 
       S.conv.push({ role: 'assistant', content: reply });
       _hideTyping();
@@ -406,12 +406,12 @@ RULES:
   });
   $('chatInput').addEventListener('input', function () {
     autoGrow(this);
-    $('sendBtn').disabled = !this.value.trim() || _waitingAI;
+    $('sendBtn').disabled = !this.value.trim()  _waitingAI;
   });
 
   async function _sendAnswer() {
     const text = $('chatInput').value.trim();
-    if (!text || _waitingAI) return;
+    if (!text  _waitingAI) return;
 
     if (rtc.isListening) {
       rtc.stopListening();
@@ -451,7 +451,7 @@ RULES:
     const container   = $('chatMessages');
     const msgDiv      = document.createElement('div');
     msgDiv.className  = `msg ${role}`;
-    const letter      = role === 'assistant' ? 'S' : (S.name.charAt(0).toUpperCase() || 'C');
+    const letter      = role === 'assistant' ? 'S' : (S.name.charAt(0).toUpperCase()  'C');
     const displayName = role === 'assistant' ? 'Sarah' : S.name;
 
     msgDiv.innerHTML = `
@@ -546,21 +546,21 @@ RULES:
         <div class="eval-score" id="commScore">0</div>
         <div class="eval-label">Communication &amp; Clarity</div>
         <div class="eval-bar"><div class="eval-fill" id="commFill" style="width:0%"></div></div>
-        <div class="eval-comment">${esc(fb.communicationComment || '')}</div>
+        <div class="eval-comment">${esc(fb.communicationComment  '')}</div>
       </div>
       <div class="eval-card culture">
         <div class="eval-icon">Fit</div>
         <div class="eval-score" id="cultureScore">0</div>
         <div class="eval-label">Cultural Fit &amp; Professionalism</div>
         <div class="eval-bar"><div class="eval-fill" id="cultureFill" style="width:0%"></div></div>
-        <div class="eval-comment">${esc(fb.culturalFitComment || '')}</div>
+        <div class="eval-comment">${esc(fb.culturalFitComment  '')}</div>
       </div>
       <div class="eval-card conf">
         <div class="eval-icon">Conf</div>
         <div class="eval-score" id="confScore">0</div>
         <div class="eval-label">Confidence Matrix</div>
         <div class="eval-bar"><div class="eval-fill" id="confFill" style="width:0%"></div></div>
-        <div class="eval-comment">${esc(fb.confidenceComment || '')}</div>
+        <div class="eval-comment">${esc(fb.confidenceComment  '')}</div>
       </div>`;
 
     setTimeout(() => {
@@ -570,9 +570,9 @@ RULES:
     }, 300);
 
     // Verdict badge
-    const v  = (fb.hiringVerdict || '').toLowerCase();
+    const v  = (fb.hiringVerdict  '').toLowerCase();
     const vb = $('vBadge');
-    vb.textContent = fb.hiringVerdict || '—';
+    vb.textContent = fb.hiringVerdict  '—';
     vb.className   = 'verdict-badge ' + (
       v.includes('strong') ? 'verdict-sh' :
       v.includes('no')     ? 'verdict-nh' :
@@ -581,21 +581,21 @@ RULES:
 
     // Strengths / Improvements
     $('tCol').innerHTML = `
-      <div class="lc green"><h3>Strengths</h3><ul>${(fb.strengths    || []).map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>
-      <div class="lc red"><h3>Areas for Improvement</h3><ul>${(fb.improvements || []).map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>`;
+      <div class="lc green"><h3>Strengths</h3><ul>${(fb.strengths     []).map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>
+      <div class="lc red"><h3>Areas for Improvement</h3><ul>${(fb.improvements  []).map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>`;
 
     // Turn-by-turn
     const turnCards = $('turnCards');
     turnCards.innerHTML = '';
-    (fb.turnFeedback || []).forEach((tf, i) => {
+    (fb.turnFeedback  []).forEach((tf, i) => {
       turnCards.innerHTML += `
         <div class="turn-card">
           <div class="turn-header">
-            <div class="turn-num">${tf.turn || i + 1}</div>
-            <div class="turn-q">${esc(tf.question || S.assistantQuestions[i]?.substring(0, 120) || '')}</div>
+            <div class="turn-num">${tf.turn  i + 1}</div>
+            <div class="turn-q">${esc(tf.question  S.assistantQuestions[i]?.substring(0, 120)  '')}</div>
           </div>
-          <div class="turn-a">${esc(S.candidateAnswers[i] || '(no response)')}</div>
-          <div class="turn-feedback">${esc(tf.assessment || '')}</div>
+          <div class="turn-a">${esc(S.candidateAnswers[i]  '(no response)')}</div>
+          <div class="turn-feedback">${esc(tf.assessment  '')}</div>
         </div>`;
     });
 
@@ -665,7 +665,7 @@ RULES:
     // Generate questions via backend
     try {
       const data = await apiPost('/api/mcq/generate', { topic, count });
-      S.mcq.questions = (data.questions || []).map(q => ({
+      S.mcq.questions = (data.questions  []).map(q => ({
         ...q, selected: null, timeSpent: 0,
       }));
       if (!S.mcq.questions.length) throw new Error('No questions returned.');
@@ -817,7 +817,7 @@ RULES:
       technicalFeedback:  `Scored ${pct}% on ${S.mcq.topic}.`,
       behavioralFeedback: 'Session completed. Review integrity metrics for more details.',
       timeAnalysis: {
-        averageTime:  Math.round(times.reduce((a, b) => a + b, 0) / times.length) || 0,
+        averageTime:  Math.round(times.reduce((a, b) => a + b, 0) / times.length)  0,
         fastestIndex: times.indexOf(Math.min(...times)),
         slowestIndex: times.indexOf(Math.max(...times)),
       },
@@ -861,18 +861,18 @@ RULES:
 
     // Stat grid
     $('mcqStatGrid').innerHTML = `
-      <div class="mcq-stat"><span class="sv" style="color:var(--accent);font-size:1rem">${fb.verdict || 'Competent'}</span><span class="sl">Verdict</span></div>
+      <div class="mcq-stat"><span class="sv" style="color:var(--accent);font-size:1rem">${fb.verdict  'Competent'}</span><span class="sl">Verdict</span></div>
       <div class="mcq-stat"><span class="sv green">${correct}</span><span class="sl">Correct</span></div>
       <div class="mcq-stat"><span class="sv red">${incorrect}</span><span class="sl">Incorrect</span></div>
       <div class="mcq-stat"><span class="sv amber">${skipped}</span><span class="sl">Skipped</span></div>`;
 
     // Time analysis
-    const ta       = fb.timeAnalysis || { averageTime: 0, fastestIndex: 0, slowestIndex: 0 };
-    const duration = Math.round(((S.mcq.endTime || Date.now()) - S.mcq.startTime) / 1000);
+    const ta       = fb.timeAnalysis  { averageTime: 0, fastestIndex: 0, slowestIndex: 0 };
+    const duration = Math.round(((S.mcq.endTime  Date.now()) - S.mcq.startTime) / 1000);
     $('mcqTimeGrid').innerHTML = `
       <div class="mcq-time-card"><div class="tv">${ta.averageTime}s</div><div class="tl">Avg Time / Question</div></div>
-      <div class="mcq-time-card"><div class="tv">${qs[ta.fastestIndex]?.timeSpent || 0}s (Q${ta.fastestIndex + 1})</div><div class="tl">Fastest Question</div></div>
-      <div class="mcq-time-card"><div class="tv">${qs[ta.slowestIndex]?.timeSpent || 0}s (Q${ta.slowestIndex + 1})</div><div class="tl">Slowest Question</div></div>
+      <div class="mcq-time-card"><div class="tv">${qs[ta.fastestIndex]?.timeSpent  0}s (Q${ta.fastestIndex + 1})</div><div class="tl">Fastest Question</div></div>
+      <div class="mcq-time-card"><div class="tv">${qs[ta.slowestIndex]?.timeSpent  0}s (Q${ta.slowestIndex + 1})</div><div class="tl">Slowest Question</div></div>
       <div class="mcq-time-card"><div class="tv">${duration}s</div><div class="tl">Total Duration</div></div>`;
 
     // Integrity grid
@@ -899,7 +899,7 @@ RULES:
       ${fb.roadmap ? `
         <h4 style="font-size:.9rem;font-weight:700;margin-bottom:10px;color:var(--accent2)">Personalised Learning Roadmap</h4>
         <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:8px">
-          ${(fb.roadmap || []).map((step, i) => `
+          ${(fb.roadmap  []).map((step, i) => `
             <li style="font-size:.85rem;color:var(--muted);padding:10px 14px;background:var(--card2);border-radius:8px;border-left:3px solid var(--accent)">
               <b>Step ${i + 1}:</b> ${esc(step)}
             </li>`).join('')}
@@ -954,7 +954,7 @@ RULES:
   function shareHRResult() {
     const fb = S.feedback;
     if (!fb) return;
-    const t = `AI Placement Portal — HR Behavioral Interview\n${S.name} | ${S.jobTitle}\nCommunication: ${fb.communicationScore}/100\nCultural Fit: ${fb.culturalFitScore}/100\nConfidence: ${fb.confidenceScore}/100\nVerdict: ${fb.hiringVerdict}`;
+    const t = `AI Placement Portal — HR Behavioral Interview\n${S.name}  ${S.jobTitle}\nCommunication: ${fb.communicationScore}/100\nCultural Fit: ${fb.culturalFitScore}/100\nConfidence: ${fb.confidenceScore}/100\nVerdict: ${fb.hiringVerdict}`;
     navigator.clipboard.writeText(t).then(() => showBanner('Copied to clipboard!', 'amber', 2000));
   }
   window.shareHRResult = shareHRResult;

@@ -72,7 +72,7 @@
      * @returns {boolean} true if the browser supports SpeechRecognition
      */
     initSTT(onResult, onEnd) {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SR = window.SpeechRecognition  window.webkitSpeechRecognition;
       if (!SR) return false;
 
       this._recognition                = new SR();
@@ -102,7 +102,7 @@
 
     /** Start microphone capture. No-op if already listening or STT not initialised. */
     startListening() {
-      if (!this._recognition || this._listening) return;
+      if (!this._recognition  this._listening) return;
       try {
         this._recognition.start();
         this._listening = true;
@@ -111,7 +111,7 @@
 
     /** Stop microphone capture. */
     stopListening() {
-      if (!this._recognition || !this._listening) return;
+      if (!this._recognition  !this._listening) return;
       this._recognition.stop();
       this._listening = false;
     }
@@ -132,7 +132,7 @@
      */
     speak(text, { onStart, onEnd } = {}) {
       const synth = window.speechSynthesis;
-      if (!synth || !text) { onEnd?.(); return; }
+      if (!synth  !text) { onEnd?.(); return; }
 
       synth.cancel();
 

@@ -38,13 +38,13 @@
     <p class="tagline">Practice HR behavioral interviews or timed MCQ quizzes — with real-time proctoring and scored evaluation reports.</p>
 
     <div id="modeSelector" class="mode-selector" role="radiogroup" aria-label="Interview mode">
-      <div id="modeHR"  class="mode-card hr"  role="radio" tabindex="0" onclick="selectMode('hr')"  onkeydown="if(event.key==='Enter'||event.key===' ')selectMode('hr')">
+      <div id="modeHR"  class="mode-card hr"  role="radio" tabindex="0" onclick="selectMode('hr')"  onkeydown="if(event.key==='Enter'event.key===' ')selectMode('hr')">
         <span class="mode-icon">Conversation</span>
         <h2>HR Behavioral Interview</h2>
         <p>Live 1-on-1 with Sarah, your AI HR Manager. Voice, video &amp; proctored.</p>
         <span class="mode-arrow">Start Interview →</span>
       </div>
-      <div id="modeMCQ" class="mode-card mcq" role="radio" tabindex="0" onclick="selectMode('mcq')" onkeydown="if(event.key==='Enter'||event.key===' ')selectMode('mcq')">
+      <div id="modeMCQ" class="mode-card mcq" role="radio" tabindex="0" onclick="selectMode('mcq')" onkeydown="if(event.key==='Enter'event.key===' ')selectMode('mcq')">
         <span class="mode-icon">Quiz</span>
         <h2>MCQ Quiz Assessment</h2>
         <p>Timed role-specific multiple-choice questions with a detailed scored report.</p>
@@ -182,7 +182,7 @@
 
   <div id="setOvl" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Settings">
     <div class="modal">
-      <button class="cb" onclick="togSet()" aria-label="Close settings">✕</button>
+      <button class="cb" onclick="togSet()" aria-label="Close settings"></button>
       <h2>Settings</h2>
       <div class="sg">
         <div class="field"><label for="sApiBase">Backend API Base URL</label><input id="sApiBase" type="url" placeholder="http://localhost:8000" /></div>

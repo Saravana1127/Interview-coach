@@ -316,8 +316,8 @@ async def evaluate_mcq(req: McqEvaluateRequest):
         result = "Correct" if q.selected == q.correct else ("Skipped" if q.selected is None else "Incorrect")
         q_lines.append(
             f"Q{i+1}: {q.question}\n"
-            f"  Selected: {sel} | Correct: {q.options[q.correct]}\n"
-            f"  Time: {q.timeSpent}s | Result: {result}"
+            f"  Selected: {sel}  Correct: {q.options[q.correct]}\n"
+            f"  Time: {q.timeSpent}s  Result: {result}"
         )
     q_summary = "\n\n".join(q_lines)
 

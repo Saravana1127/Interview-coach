@@ -253,16 +253,16 @@ def _show_copy_text() -> None:
         verdict = ev.get("verdict", "—")
         text = (
             f"AI Placement Portal — MCQ Assessment\n"
-            f"Candidate: {name} | Topic: {job}\n"
-            f"Score: {score}% | Tier: {verdict}"
+            f"Candidate: {name}  Topic: {job}\n"
+            f"Score: {score}%  Tier: {verdict}"
         )
     else:
         score = ev.get("overallScore", 0)
         verdict = ev.get("hiringVerdict", "—")
         text = (
             f"AI Placement Portal — HR Behavioral Interview\n"
-            f"Candidate: {name} | Role: {job}\n"
-            f"Overall: {score}/100 | Verdict: {verdict}"
+            f"Candidate: {name}  Role: {job}\n"
+            f"Overall: {score}/100  Verdict: {verdict}"
         )
 
     st.code(text, language=None)
