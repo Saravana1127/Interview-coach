@@ -6,10 +6,19 @@ import sys
 # Ensure local imports resolve correctly
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import importlib
 import ai_engine
+importlib.reload(ai_engine)
 import pdf_processor
+importlib.reload(pdf_processor)
+import audio_component
+importlib.reload(audio_component)
 from audio_component import audio_component
+import video_handler
+importlib.reload(video_handler)
 from video_handler import render_camera_feed
+import components.proctoring
+importlib.reload(components.proctoring)
 from components.proctoring import run_proctoring
 
 # 1. Page Configuration
