@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_URL       = os.getenv("OPENWEBUI_API_URL", "http://localhost:11434/v1/chat/completions")
-DEFAULT_MODEL = os.getenv("MODEL_NAME",         "llama3")
+DEFAULT_MODEL = os.getenv("MODEL_NAME",         "llama3.2:1b")
 API_KEY       = os.getenv("OPENWEBUI_API_KEY",  "")
 
 # Core LLM call

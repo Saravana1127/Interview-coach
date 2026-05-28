@@ -320,91 +320,110 @@ def _render_step3_hr():
 
     # Handle pending LLM answer
     if st.session_state.hr_waiting:
-        with st.spinner("Interview Coach is typing response..."):
+        with st.spinner("Interview Coach is formulating the next question..."):
             _get_coach_response(name, job)
         st.rerun()
 
     # Initialise conversation with resume summary context
-    if not st.session_state.hr_messages:
+    if len(st.session_state.hr_messages) < 2:
         system_prompt = ai_engine.get_interview_coach_system_prompt(name, job, summary, TOTAL_TURNS)
         st.session_state.hr_messages = [{"role": "system", "content": system_prompt}]
-        with st.spinner("Interview Coach is preparing opening question..."):
+        with st.spinner("Connecting with your Interview Coach..."):
             _open_interview(name, job)
         st.rerun()
 
+    # Title & Stats header
     h1, h2, h3 = st.columns([3, 1, 1])
     with h1:
-        st.markdown("## Live Behavioral Interview")
-        st.caption(f"Candidate: {name} · Target Role: {job}")
+        st.markdown(
+            f"<h2 style='margin:0;color:#0f172a;font-weight:800;'>Live Video & Voice Interview</h2>"
+            f"<p style='margin:4px 0 0;color:#6d28d9;font-weight:600;'>Role: {job} &nbsp;|&nbsp; Candidate: {name}</p>",
+            unsafe_allow_html=True
+        )
     with h2:
-        st.metric("Turn", f"{st.session_state.hr_turn} / {TOTAL_TURNS}")
+        st.metric("Assessment Turn", f"{st.session_state.hr_turn} / {TOTAL_TURNS}")
     with h3:
-        if st.button("Cancel Pipeline", key="hr_cancel"):
+        if st.button("End Session", key="hr_cancel", use_container_width=True):
             st.session_state.step = 1
             st.rerun()
 
     st.progress(
         min(st.session_state.hr_turn / TOTAL_TURNS, 1.0),
-        text=f"Interview Progress: Turn {st.session_state.hr_turn} of {TOTAL_TURNS}",
+        text=f"Interview Progress: {st.session_state.hr_turn} of {TOTAL_TURNS} turns completed",
     )
-    st.divider()
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    cam_col, chat_col = st.columns([1, 2], gap="large")
+    # Split Panel Layout
+    cam_col, ctrl_col = st.columns([1, 1], gap="large")
 
     with cam_col:
         st.markdown(
             """
-            <div class="aip-card" style="text-align:center;padding:20px;">
-                <h4 style="color:#6d28d9;margin:0 0 4px;">Interview Coach</h4>
-                <p style="color:#475569;font-size:.78rem;margin:0;font-weight:normal !important;">AI Senior HR Professional</p>
+            <div style="background:#0f172a;padding:12px 20px;border-radius:12px 12px 0 0;display:flex;justify-content:between;align-items:center;margin-bottom:0;">
+                <span style="color:#ffffff;font-size:0.85rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">
+                    Candidate Feed
+                </span>
+                <span style="background:#dc2626;color:#ffffff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px;animation: pulse 2s infinite;">
+                    PROCTORING ACTIVE
+                </span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        # Automatic camera activation
+        render_camera_feed(key="hr-webcam")
+        st.caption("Keep your face centered in the camera frame throughout the session.")
+
+    with ctrl_col:
+        # Interviewer Panel
+        st.markdown(
+            """
+            <div class="aip-card" style="padding:20px;margin-bottom:16px;border-left:4px solid #6d28d9;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                    <div style="width:10px;height:10px;border-radius:50%;background:#22c55e;"></div>
+                    <h4 style="color:#0f172a;margin:0;font-weight:800;font-size:1.05rem;">Interview Coach</h4>
+                </div>
+                <p style="color:#475569;font-size:0.85rem;margin:0 0 16px;font-weight:normal !important;line-height:1.4;">
+                    Your responses are evaluated live using professional career coaching rubrics. Please speak clearly.
+                </p>
             </div>
             """,
             unsafe_allow_html=True,
         )
-        st.markdown(
-            "<p style='color:#475569;font-weight:600;margin-bottom:6px;'>Your Camera Feed</p>",
-            unsafe_allow_html=True,
-        )
-        # Automatic camera activation
-        render_camera_feed(key="hr-webcam")
 
-    with chat_col:
-        st.markdown(
-            "<h4 style='color:#6d28d9;margin-bottom:12px;'>Interview Session Log</h4>",
-            unsafe_allow_html=True,
-        )
-
-        chat_box = st.container(height=340)
-        with chat_box:
-            for msg in st.session_state.hr_messages:
-                if msg["role"] == "system":
-                    continue
+        # Get latest question
+        current_question = ""
+        if st.session_state.hr_messages:
+            # Find the latest assistant message
+            for msg in reversed(st.session_state.hr_messages):
                 if msg["role"] == "assistant":
-                    with st.chat_message("assistant"):
-                        st.markdown(f"**Interview Coach:** {msg['content']}")
-                elif msg["role"] == "user":
-                    content = msg["content"]
-                    if content.startswith("[Candidate"):
-                        clean = content.split("]:", 1)[-1].strip()
-                    else:
-                        clean = content
-                    with st.chat_message("user"):
-                        st.markdown(f"**{name}:** {clean}")
+                    current_question = msg["content"]
+                    break
+
+        # Display Current Active Question
+        if current_question:
+            st.markdown(
+                f"""
+                <div class="aip-card" style="background:#f1f5f9;border:1px solid #cbd5e1;padding:24px;margin-bottom:16px;">
+                    <div style="color:#6d28d9;font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">
+                        Current Question
+                    </div>
+                    <p style="color:#0f172a;font-size:1.15rem;font-weight:700;line-height:1.6;margin:0;">
+                        "{current_question}"
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         interview_over = st.session_state.hr_turn >= TOTAL_TURNS
 
-        # Automatic Audio Turn-Taking Bridge
-        tts_text = ""
-        if st.session_state.hr_messages:
-            last_msg = st.session_state.hr_messages[-1]
-            if last_msg["role"] == "assistant":
-                tts_text = last_msg["content"]
-
         if not interview_over:
-            st.markdown("<p style='color:#6d28d9;font-size:0.9rem;font-weight:600;margin-bottom:0.2rem;'>Voice Control Status</p>", unsafe_allow_html=True)
+            # Voice control area
+            st.markdown("<p style='color:#6d28d9;font-size:0.85rem;font-weight:700;margin-bottom:6px;text-transform:uppercase;'>Voice Interaction</p>", unsafe_allow_html=True)
             
             # Embed the automatic voice component
-            transcript = audio_component(tts_text=tts_text, key=f"audio_component_turn_{st.session_state.hr_turn}")
+            transcript = audio_component(tts_text=current_question, key=f"audio_component_turn_{st.session_state.hr_turn}")
             
             if transcript is not None and transcript != st.session_state.get("last_processed_transcript"):
                 st.session_state.last_processed_transcript = transcript
@@ -414,8 +433,9 @@ def _render_step3_hr():
                     _process_answer(transcript.strip())
 
             # Text input fallback
+            st.markdown("<p style='color:#475569;font-size:0.8rem;font-weight:600;margin-top:16px;margin-bottom:4px;'>Text Input Fallback</p>", unsafe_allow_html=True)
             user_input = st.chat_input(
-                f"Type your response, {name}...",
+                f"Type your response here if voice transcription is unavailable...",
                 key=f"hr_chat_input_{st.session_state.hr_turn}",
             )
             if user_input and user_input.strip():
@@ -430,6 +450,18 @@ def _render_step3_hr():
             ):
                 _evaluate_hr(name, job)
 
+        # Expandable Chat Log History
+        with st.expander("Show Conversation History Log", expanded=False):
+            for msg in st.session_state.hr_messages:
+                if msg["role"] == "system":
+                    continue
+                if msg["role"] == "assistant":
+                    st.markdown(f"**Interview Coach:** {msg['content']}")
+                elif msg["role"] == "user":
+                    content = msg["content"]
+                    clean = content.split("]:", 1)[-1].strip() if content.startswith("[Candidate") else content
+                    st.markdown(f"**{name}:** {clean}")
+
 def _open_interview(name: str, job: str):
     try:
         opening = ai_engine.get_next_hr_message(
@@ -438,10 +470,10 @@ def _open_interview(name: str, job: str):
             total_turns=TOTAL_TURNS,
             name=name,
         )
-        st.session_state.hr_messages.append({"role": "assistant", "content": opening})
-        st.session_state.hr_questions.append(opening)
     except Exception as exc:
-        st.error(f"Could not reach Interview Coach: {exc}")
+        opening = f"Hello {name}. I am your Interview Coach today. Congratulations on reaching this stage for the {job} role. To get us started, could you please introduce yourself and briefly walk me through your professional background?"
+    st.session_state.hr_messages.append({"role": "assistant", "content": opening})
+    st.session_state.hr_questions.append(opening)
 
 def _process_answer(answer: str):
     st.session_state.hr_messages.append(
@@ -460,15 +492,20 @@ def _get_coach_response(name: str, job: str):
             total_turns=TOTAL_TURNS,
             name=name,
         )
-        st.session_state.hr_messages.append({"role": "assistant", "content": reply})
-        st.session_state.hr_questions.append(reply)
     except Exception as exc:
-        fallback = "I apologize - I am having a brief connection issue. Please continue with your next response."
-        st.session_state.hr_messages.append({"role": "assistant", "content": fallback})
-        st.session_state.hr_questions.append(fallback)
-        st.warning(f"Error: {exc}")
-    finally:
-        st.session_state.hr_waiting = False
+        questions_pool = [
+            "Tell me about a time you faced a significant challenge at work. How did you handle it?",
+            "Describe a situation where you demonstrated leadership without a formal title.",
+            "Share an example of working effectively in a team under pressure.",
+            "Tell me about a time you had to adapt quickly to a major change.",
+            "What is your greatest professional achievement and what was your specific role in it?"
+        ]
+        idx = (st.session_state.hr_turn - 1) % len(questions_pool)
+        reply = f"I see. Let's move to the next question. {questions_pool[idx]}"
+    
+    st.session_state.hr_messages.append({"role": "assistant", "content": reply})
+    st.session_state.hr_questions.append(reply)
+    st.session_state.hr_waiting = False
 
 def _evaluate_hr(name: str, job: str):
     with st.spinner("Interview Coach is writing your evaluation report..."):
